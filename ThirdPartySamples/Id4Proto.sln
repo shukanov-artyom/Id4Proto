@@ -19,7 +19,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ResourceOwnerClient", "src\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MvcClient", "src\MvcClient\MvcClient.csproj", "{4CFB4883-9929-4814-BE22-2E19476CE4A3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebFormsOWINImplicit", src\WebFormsClient\WebFormsOWINImplicit.csproj", "{43757AF6-7762-44AC-A8B7-842C119BE3CB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebFormsImplicit", src\WebFormsClient\WebFormsImplicit.csproj", "{43757AF6-7762-44AC-A8B7-842C119BE3CB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebFormsHybrid", "src\WebFormsHybrid\WebFormsHybrid.csproj", "{22D9724D-A502-40B5-A37C-671697F9554F}"
 EndProject
