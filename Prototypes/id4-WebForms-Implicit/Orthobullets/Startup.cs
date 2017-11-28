@@ -21,7 +21,7 @@ namespace WebApp
         {
             app.UseCookieAuthentication(new CookieAuthenticationOptions()
             {
-                AuthenticationType = "Cookies",
+                AuthenticationType = "CookiesOrthobullets",
                 ExpireTimeSpan = TimeSpan.FromMinutes(10),
                 SlidingExpiration = true
             });
@@ -31,32 +31,31 @@ namespace WebApp
             app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
             {
                 AuthenticationType = "oidc",
-                SignInAsAuthenticationType = "Cookies",
+                SignInAsAuthenticationType = "CookiesOrthobullets",
                 Authority = "https://localhost:44336/",
-                ClientId = "webforms.owin.implicit.medbullets",
-                RedirectUri = "http://localhost:5969/",
-                PostLogoutRedirectUri = "http://localhost:5969/",
+                ClientId = "implicit.orthobullets",
+                RedirectUri = "http://localhost:5970/signin-oidc",
+                PostLogoutRedirectUri = "http://localhost:5970/",
                 ResponseType = "id_token token",
                 Scope = "openid profile email address",
-                //Scope = "openid profile",
                 UseTokenLifetime = false,   
                 Notifications = new OpenIdConnectAuthenticationNotifications
                 {
                     SecurityTokenValidated = async n =>
                     {
-                        var claims_to_exclude = new[]
+                        var claimsToExclude = new[]
                         {
                             "aud", "iss", "nbf", "exp", "nonce", "iat", "at_hash"
                         };
 
-                        var claims_to_keep =
+                        var claimsToKeep =
                             n.AuthenticationTicket.Identity.Claims
-                            .Where(x => false == claims_to_exclude.Contains(x.Type)).ToList();
-                        claims_to_keep.Add(new Claim("id_token", n.ProtocolMessage.IdToken));
+                            .Where(x => false == claimsToExclude.Contains(x.Type)).ToList();
+                        claimsToKeep.Add(new Claim("id_token", n.ProtocolMessage.IdToken));
 
                         if (n.ProtocolMessage.AccessToken != null)
                         {
-                            claims_to_keep.Add(new Claim("access_token", n.ProtocolMessage.AccessToken));
+                            claimsToKeep.Add(new Claim("access_token", n.ProtocolMessage.AccessToken));
 
                             var userInfoClient = new UserInfoClient(
                                 new Uri("https://localhost:44336/connect/userinfo"),
@@ -65,13 +64,13 @@ namespace WebApp
                             var userInfoClaims = userInfoResponse.Claims
                                 .Where(x => x.Item1 != "sub") // filter sub since we're already getting it from id_token
                                 .Select(x => new Claim(x.Item1, x.Item2));
-                            claims_to_keep.AddRange(userInfoClaims);
+                            claimsToKeep.AddRange(userInfoClaims);
                         }
 
                         var ci = new ClaimsIdentity(
                             n.AuthenticationTicket.Identity.AuthenticationType,
                             "name", "role");
-                        ci.AddClaims(claims_to_keep);
+                        ci.AddClaims(claimsToKeep);
 
                         n.AuthenticationTicket = new Microsoft.Owin.Security.AuthenticationTicket(
                             ci, n.AuthenticationTicket.Properties
@@ -81,8 +80,8 @@ namespace WebApp
                     {
                         if (n.ProtocolMessage.RequestType == OpenIdConnectRequestType.LogoutRequest)
                         {
-                            var id_token = n.OwinContext.Authentication.User.FindFirst("id_token")?.Value;
-                            n.ProtocolMessage.IdTokenHint = id_token;
+                            var idToken = n.OwinContext.Authentication.User.FindFirst("id_token")?.Value;
+                            n.ProtocolMessage.IdTokenHint = idToken;
                         }
                         
                         return Task.FromResult(0);

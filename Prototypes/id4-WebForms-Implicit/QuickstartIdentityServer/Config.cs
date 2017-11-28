@@ -40,7 +40,36 @@ namespace QuickstartIdentityServer
                 new Client
                 {
                     ClientName = "Medbullets",
-                    ClientId = "webforms.owin.implicit.medbullets",
+                    ClientId = "implicit.medbullets",
+                    AllowedGrantTypes = GrantTypes.Implicit,
+                    // TODO : investigate and get rid of passing access tokens to front channel
+                    AllowAccessTokensViaBrowser = true,
+                    AllowedScopes = new List<string>()
+                    {
+                        IdentityServerConstants.StandardScopes.OpenId,
+                        IdentityServerConstants.StandardScopes.Profile,
+                        IdentityServerConstants.StandardScopes.Email,
+                        //IdentityServerConstants.StandardScopes.Address
+                    },
+
+                    ClientUri = "https://medbullets.io",
+
+                    RequireConsent = false,
+                    AllowRememberConsent = true,
+                    FrontChannelLogoutUri = "http://localhost:5969/logout.aspx",
+                    RedirectUris = new List<string>
+                    {
+                        "http://localhost:5969/signin-oidc"
+                    },
+                    PostLogoutRedirectUris = new List<string>
+                    {
+                        "http://localhost:5969/"
+                    }
+                },
+                new Client
+                {
+                    ClientName = "Orthobullets",
+                    ClientId = "implicit.orthobullets",
                     AllowedGrantTypes = GrantTypes.Implicit,
                     // TODO : investigate and get rid of passing access tokens to front channel
                     AllowAccessTokensViaBrowser = true,
@@ -52,18 +81,18 @@ namespace QuickstartIdentityServer
                         IdentityServerConstants.StandardScopes.Address
                     },
 
-                    ClientUri = "https://identityserver.io",
+                    ClientUri = "https://orthobullets.io",
 
                     RequireConsent = false,
                     AllowRememberConsent = true,
-                    FrontChannelLogoutUri = "http://localhost:5969/logout.aspx",
+                    FrontChannelLogoutUri = "http://localhost:5970/logout.aspx",
                     RedirectUris = new List<string>
                     {
-                        "http://localhost:5969/"
+                        "http://localhost:5970/signin-oidc"
                     },
                     PostLogoutRedirectUris = new List<string>
                     {
-                        "http://localhost:5969/"
+                        "http://localhost:5970/"
                     }
                 }
             };

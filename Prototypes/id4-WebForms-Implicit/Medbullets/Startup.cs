@@ -21,7 +21,7 @@ namespace WebApp
         {
             app.UseCookieAuthentication(new CookieAuthenticationOptions()
             {
-                AuthenticationType = "Cookies",
+                AuthenticationType = "CookiesMedbullets",
                 ExpireTimeSpan = TimeSpan.FromMinutes(10),
                 SlidingExpiration = true
             });
@@ -31,13 +31,13 @@ namespace WebApp
             app.UseOpenIdConnectAuthentication(new OpenIdConnectAuthenticationOptions
             {
                 AuthenticationType = "oidc",
-                SignInAsAuthenticationType = "Cookies",
+                SignInAsAuthenticationType = "CookiesMedbullets",
                 Authority = "https://localhost:44336/",
                 ClientId = "implicit.medbullets",
-                RedirectUri = "http://localhost:5969/",
+                RedirectUri = "http://localhost:5969/signin-oidc",
                 PostLogoutRedirectUri = "http://localhost:5969/",
                 ResponseType = "id_token token",
-                Scope = "openid profile email address",
+                Scope = "openid profile email",
                 UseTokenLifetime = false,
                 Notifications = new OpenIdConnectAuthenticationNotifications
                 {
