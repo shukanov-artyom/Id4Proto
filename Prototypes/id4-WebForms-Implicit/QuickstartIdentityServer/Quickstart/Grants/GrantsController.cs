@@ -1,14 +1,10 @@
-﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
-
-
-using IdentityServer4.Services;
-using IdentityServer4.Stores;
-using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using IdentityServer4.Services;
+using IdentityServer4.Stores;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace IdentityServer4.Quickstart.UI
 {
@@ -16,10 +12,11 @@ namespace IdentityServer4.Quickstart.UI
     /// This sample controller allows a user to revoke grants given to clients
     /// </summary>
     [SecurityHeaders]
-    [Authorize(AuthenticationSchemes = IdentityServer4.IdentityServerConstants.DefaultCookieAuthenticationScheme)]
+    [Authorize(AuthenticationSchemes =
+        IdentityServerConstants.DefaultCookieAuthenticationScheme)]
     public class GrantsController : Controller
     {
-        private readonly IIdentityServerInteractionService _interaction;
+        private readonly IIdentityServerInteractionService interaction;
         private readonly IClientStore _clients;
         private readonly IResourceStore _resources;
 
@@ -27,7 +24,7 @@ namespace IdentityServer4.Quickstart.UI
             IClientStore clients,
             IResourceStore resources)
         {
-            _interaction = interaction;
+            this.interaction = interaction;
             _clients = clients;
             _resources = resources;
         }
@@ -48,13 +45,13 @@ namespace IdentityServer4.Quickstart.UI
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Revoke(string clientId)
         {
-            await _interaction.RevokeUserConsentAsync(clientId);
+            await interaction.RevokeUserConsentAsync(clientId);
             return RedirectToAction("Index");
         }
 
         private async Task<GrantsViewModel> BuildViewModelAsync()
         {
-            var grants = await _interaction.GetAllUserConsentsAsync();
+            var grants = await interaction.GetAllUserConsentsAsync();
 
             var list = new List<GrantViewModel>();
             foreach(var grant in grants)

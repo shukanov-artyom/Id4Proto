@@ -107,7 +107,6 @@ namespace QuickstartIdentityServer
                     SubjectId = "1",
                     Username = "alice",
                     Password = "alice",
-                    
                     Claims = new List<Claim>
                     {
                         new Claim("name", "Alice"),

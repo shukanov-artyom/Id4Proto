@@ -1,23 +1,19 @@
-﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
-
-
-using IdentityModel;
-using IdentityServer4.Services;
-using IdentityServer4.Stores;
-using IdentityServer4.Test;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Principal;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
+using IdentityModel;
 using IdentityServer4.Events;
 using IdentityServer4.Extensions;
 using IdentityServer4.Models;
+using IdentityServer4.Services;
+using IdentityServer4.Stores;
+using IdentityServer4.Test;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
 namespace IdentityServer4.Quickstart.UI
 {
@@ -29,10 +25,10 @@ namespace IdentityServer4.Quickstart.UI
     [SecurityHeaders]
     public class AccountController : Controller
     {
-        private readonly TestUserStore _users;
-        private readonly IIdentityServerInteractionService _interaction;
-        private readonly IEventService _events;
-        private readonly AccountService _account;
+        private readonly TestUserStore users;
+        private readonly IIdentityServerInteractionService interaction;
+        private readonly IEventService events;
+        private readonly AccountService account;
 
         public AccountController(
             IIdentityServerInteractionService interaction,
@@ -43,10 +39,10 @@ namespace IdentityServer4.Quickstart.UI
             TestUserStore users = null)
         {
             // if the TestUserStore is not in DI, then we'll just use the global users collection
-            _users = users ?? new TestUserStore(TestUsers.Users);
-            _interaction = interaction;
-            _events = events;
-            _account = new AccountService(interaction, httpContextAccessor, schemeProvider, clientStore);
+            this.users = users ?? new TestUserStore(TestUsers.Users);
+            this.interaction = interaction;
+            this.events = events;
+            account = new AccountService(interaction, httpContextAccessor, schemeProvider, clientStore);
         }
 
         /// <summary>
@@ -56,7 +52,7 @@ namespace IdentityServer4.Quickstart.UI
         public async Task<IActionResult> Login(string returnUrl)
         {
             // build a model so we know what to show on the login page
-            var vm = await _account.BuildLoginViewModelAsync(returnUrl);
+            var vm = await account.BuildLoginViewModelAsync(returnUrl);
 
             if (vm.IsExternalLoginOnly)
             {
@@ -77,14 +73,13 @@ namespace IdentityServer4.Quickstart.UI
             if (button != "login")
             {
                 // the user clicked the "cancel" button
-                var context = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
+                var context = await interaction.GetAuthorizationContextAsync(model.ReturnUrl);
                 if (context != null)
                 {
-                    // if the user cancels, send a result back into IdentityServer as if they 
+                    // if the user cancels, send a result back into IdentityServer as if they
                     // denied the consent (even if this client does not require consent).
                     // this will send back an access denied OIDC error response to the client.
-                    await _interaction.GrantConsentAsync(context, ConsentResponse.Denied);
-                    
+                    await interaction.GrantConsentAsync(context, ConsentResponse.Denied);
                     // we can trust model.ReturnUrl since GetAuthorizationContextAsync returned non-null
                     return Redirect(model.ReturnUrl);
                 }
@@ -98,12 +93,12 @@ namespace IdentityServer4.Quickstart.UI
             if (ModelState.IsValid)
             {
                 // validate username/password against in-memory store
-                if (_users.ValidateCredentials(model.Username, model.Password))
+                if (users.ValidateCredentials(model.Username, model.Password))
                 {
-                    var user = _users.FindByUsername(model.Username);
-                    await _events.RaiseAsync(new UserLoginSuccessEvent(user.Username, user.SubjectId, user.Username));
+                    var user = users.FindByUsername(model.Username);
+                    await events.RaiseAsync(new UserLoginSuccessEvent(user.Username, user.SubjectId, user.Username));
 
-                    // only set explicit expiration here if user chooses "remember me". 
+                    // only set explicit expiration here if user chooses "remember me".
                     // otherwise we rely upon expiration configured in cookie middleware.
                     AuthenticationProperties props = null;
                     if (AccountOptions.AllowRememberLogin && model.RememberLogin)
@@ -118,7 +113,7 @@ namespace IdentityServer4.Quickstart.UI
                     await HttpContext.SignInAsync(user.SubjectId, user.Username, props);
 
                     // make sure the returnUrl is still valid, and if so redirect back to authorize endpoint or a local page
-                    if (_interaction.IsValidReturnUrl(model.ReturnUrl) || Url.IsLocalUrl(model.ReturnUrl))
+                    if (interaction.IsValidReturnUrl(model.ReturnUrl) || Url.IsLocalUrl(model.ReturnUrl))
                     {
                         return Redirect(model.ReturnUrl);
                     }
@@ -126,13 +121,13 @@ namespace IdentityServer4.Quickstart.UI
                     return Redirect("~/");
                 }
 
-                await _events.RaiseAsync(new UserLoginFailureEvent(model.Username, "invalid credentials"));
+                await events.RaiseAsync(new UserLoginFailureEvent(model.Username, "invalid credentials"));
 
                 ModelState.AddModelError("", AccountOptions.InvalidCredentialsErrorMessage);
             }
 
             // something went wrong, show form with error
-            var vm = await _account.BuildLoginViewModelAsync(model);
+            var vm = await account.BuildLoginViewModelAsync(model);
             return View(vm);
         }
 
@@ -152,7 +147,7 @@ namespace IdentityServer4.Quickstart.UI
             };
 
             // windows authentication needs special handling
-            // since they don't support the redirect uri, 
+            // since they don't support the redirect uri,
             // so this URL is re-triggered when we call challenge
             if (AccountOptions.WindowsAuthenticationSchemeName == provider)
             {
@@ -233,14 +228,13 @@ namespace IdentityServer4.Quickstart.UI
 
             // this is where custom logic would most likely be needed to match your users from the
             // external provider's authentication result, and provision the user as you see fit.
-            // 
             // check if the external user is already provisioned
-            var user = _users.FindByExternalProvider(provider, userId);
+            var user = users.FindByExternalProvider(provider, userId);
             if (user == null)
             {
                 // this sample simply auto-provisions new external user
                 // another common approach is to start a registrations workflow first
-                user = _users.AutoProvisionUser(provider, userId, claims);
+                user = users.AutoProvisionUser(provider, userId, claims);
             }
 
             var additionalClaims = new List<Claim>();
@@ -263,7 +257,7 @@ namespace IdentityServer4.Quickstart.UI
             }
 
             // issue authentication cookie for user
-            await _events.RaiseAsync(new UserLoginSuccessEvent(provider, userId, user.SubjectId, user.Username));
+            await events.RaiseAsync(new UserLoginSuccessEvent(provider, userId, user.SubjectId, user.Username));
             await HttpContext.SignInAsync(user.SubjectId, user.Username, provider, props, additionalClaims.ToArray());
 
             // delete temporary cookie used during external authentication
@@ -271,7 +265,7 @@ namespace IdentityServer4.Quickstart.UI
 
             // validate return URL and redirect back to authorization endpoint or a local page
             var returnUrl = result.Properties.Items["returnUrl"];
-            if (_interaction.IsValidReturnUrl(returnUrl) || Url.IsLocalUrl(returnUrl))
+            if (interaction.IsValidReturnUrl(returnUrl) || Url.IsLocalUrl(returnUrl))
             {
                 return Redirect(returnUrl);
             }
@@ -286,7 +280,7 @@ namespace IdentityServer4.Quickstart.UI
         public async Task<IActionResult> Logout(string logoutId)
         {
             // build a model so the logout page knows what to display
-            var vm = await _account.BuildLogoutViewModelAsync(logoutId);
+            var vm = await account.BuildLogoutViewModelAsync(logoutId);
 
             if (vm.ShowLogoutPrompt == false)
             {
@@ -306,7 +300,7 @@ namespace IdentityServer4.Quickstart.UI
         public async Task<IActionResult> Logout(LogoutInputModel model)
         {
             // build a model so the logged out page knows what to display
-            var vm = await _account.BuildLoggedOutViewModelAsync(model.LogoutId);
+            var vm = await account.BuildLoggedOutViewModelAsync(model.LogoutId);
 
             var user = HttpContext.User;
             if (user?.Identity.IsAuthenticated == true)
@@ -315,7 +309,7 @@ namespace IdentityServer4.Quickstart.UI
                 await HttpContext.SignOutAsync();
 
                 // raise the logout event
-                await _events.RaiseAsync(new UserLogoutSuccessEvent(user.GetSubjectId(), user.GetName()));
+                await events.RaiseAsync(new UserLogoutSuccessEvent(user.GetSubjectId(), user.GetName()));
             }
 
             // check if we need to trigger sign-out at an upstream identity provider
