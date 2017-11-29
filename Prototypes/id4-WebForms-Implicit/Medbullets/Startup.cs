@@ -19,6 +19,9 @@ namespace WebApp
     {
         public void Configuration(IAppBuilder app)
         {
+            string userInfoEndpoint = 
+                "https://localhost:44336/connect/userinfo";
+
             app.UseCookieAuthentication(new CookieAuthenticationOptions()
             {
                 AuthenticationType = "CookiesMedbullets",
@@ -50,7 +53,8 @@ namespace WebApp
 
                         var claimsToKeep =
                             n.AuthenticationTicket.Identity.Claims
-                            .Where(x => false == claimsToExclude.Contains(x.Type)).ToList();
+                            .Where(x => !claimsToExclude.Contains(x.Type))
+                            .ToList();
                         claimsToKeep.Add(new Claim("id_token", n.ProtocolMessage.IdToken));
 
                         if (n.ProtocolMessage.AccessToken != null)
@@ -58,8 +62,9 @@ namespace WebApp
                             claimsToKeep.Add(new Claim("access_token", n.ProtocolMessage.AccessToken));
 
                             var userInfoClient = new UserInfoClient(
-                                new Uri("https://localhost:44336/connect/userinfo"),
-                                n.ProtocolMessage.AccessToken);
+                                new Uri(userInfoEndpoint),
+                                n.ProtocolMessage.AccessToken); // Leverage Implicit flow we request User claims from endpoint usina access token!
+                            // But access token came through front channel!
                             var userInfoResponse = await userInfoClient.GetAsync();
                             var userInfoClaims = userInfoResponse.Claims
                                 .Where(x => x.Item1 != "sub") // filter sub since we're already getting it from id_token
@@ -78,12 +83,13 @@ namespace WebApp
                     },
                     RedirectToIdentityProvider = n =>
                     {
-                        if (n.ProtocolMessage.RequestType == OpenIdConnectRequestType.LogoutRequest)
+                        if (n.ProtocolMessage.RequestType ==
+                            OpenIdConnectRequestType.LogoutRequest)
                         {
-                            var idToken = n.OwinContext.Authentication.User.FindFirst("id_token")?.Value;
+                            var idToken = n.OwinContext.Authentication
+                                .User.FindFirst("id_token")?.Value;
                             n.ProtocolMessage.IdTokenHint = idToken;
                         }
-                        
                         return Task.FromResult(0);
                     }
                 }
