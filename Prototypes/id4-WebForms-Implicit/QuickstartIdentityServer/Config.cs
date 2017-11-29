@@ -1,15 +1,12 @@
-﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
-
+﻿using System.Collections.Generic;
+using System.Security.Claims;
 using IdentityServer4;
 using IdentityServer4.Models;
 using IdentityServer4.Test;
-using System.Collections.Generic;
-using System.Security.Claims;
 
 namespace QuickstartIdentityServer
 {
-    public class Config
+    public static class Config
     {
         // scopes define the resources in your system
         public static IEnumerable<IdentityResource> GetIdentityResources()
@@ -19,7 +16,11 @@ namespace QuickstartIdentityServer
                 new IdentityResources.OpenId(),
                 new IdentityResources.Profile(),
                 new IdentityResources.Email(),
-                new IdentityResources.Address()
+                new IdentityResources.Address(),
+                new IdentityResource(
+                    name: "profile.agent",
+                    displayName: "Agent profile",
+                    claimTypes: new[] { "agentinfo1", "agentinfo2" })
             };
         }
 
@@ -27,6 +28,7 @@ namespace QuickstartIdentityServer
         {
             return new List<ApiResource>
             {
+                // currently nonfunctional but still present for sample
                 new ApiResource("api1", "My API")
             };
         }
@@ -49,6 +51,7 @@ namespace QuickstartIdentityServer
                         IdentityServerConstants.StandardScopes.OpenId,
                         IdentityServerConstants.StandardScopes.Profile,
                         IdentityServerConstants.StandardScopes.Email,
+                        "profile.agent"
                         //IdentityServerConstants.StandardScopes.Address
                     },
 
@@ -112,7 +115,9 @@ namespace QuickstartIdentityServer
                         new Claim("name", "Alice"),
                         new Claim("email", "alice@gmail.com"),
                         new Claim("address", "Minsk"),
-                        new Claim("website", "https://alice.com")
+                        new Claim("website", "https://alice.com"),
+                        new Claim("agentinfo1", "I'm Alice One!"),
+                        new Claim("agentinfo2", "I'm Alice Two!")
                     }
                 },
                 new TestUser
@@ -126,7 +131,9 @@ namespace QuickstartIdentityServer
                         new Claim("name", "Bob"),
                         new Claim("email", "bob@gmail.com"),
                         new Claim("address", "Mazyr"),
-                        new Claim("website", "https://bob.com")
+                        new Claim("website", "https://bob.com"),
+                        new Claim("agentinfo1", "I'm Bob One!"),
+                        new Claim("agentinfo2", "I'm Bob Two!"),
                     }
                 }
             };

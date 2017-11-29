@@ -37,7 +37,7 @@ namespace WebApp
                 RedirectUri = "http://localhost:5969/signin-oidc",
                 PostLogoutRedirectUri = "http://localhost:5969/",
                 ResponseType = "id_token token",
-                Scope = "openid profile email",
+                Scope = "openid profile email profile.agent",
                 UseTokenLifetime = false,
                 Notifications = new OpenIdConnectAuthenticationNotifications
                 {
