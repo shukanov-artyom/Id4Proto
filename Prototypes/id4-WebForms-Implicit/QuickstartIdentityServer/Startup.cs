@@ -1,10 +1,10 @@
-﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
-
-using IdentityServer4.Configuration;
+﻿using IdentityServer4.Services;
+using IdentityServer4.Validation;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using QuickstartIdentityServer.DomainServices;
+using QuickstartIdentityServer.IdentityServices;
 
 namespace QuickstartIdentityServer
 {
@@ -13,15 +13,19 @@ namespace QuickstartIdentityServer
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
-
-            // configure identity server with in-memory stores, keys, clients and scopes
+            services.AddTransient<IPasswordValidationService, PasswordValidationService>();
+            services.AddTransient<IResourceOwnerPasswordValidator, ResourceOwnerPasswordValidator>();
+            services.AddTransient<IUserService, UserService>();
+            services.AddTransient<IProfileService, ProfileService>();
+            //services.AddTransient<IUserInfoService, UserInfoService>();
             services.AddIdentityServer()
                 .AddDeveloperSigningCredential()
                 // We do not manage scopes in id4, we call them Resources!
                 .AddInMemoryIdentityResources(Config.GetIdentityResources())
                 .AddInMemoryApiResources(Config.GetApiResources())
                 .AddInMemoryClients(Config.GetClients())
-                .AddTestUsers(Config.GetUsers());
+                .AddResourceOwnerValidator<ResourceOwnerPasswordValidator>()
+                .AddProfileService<ProfileService>();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)

@@ -72,13 +72,13 @@ namespace WebApp
                             claimsToKeep.AddRange(userInfoClaims);
                         }
 
-                        var ci = new ClaimsIdentity(
+                        var claimsIdentity = new ClaimsIdentity(
                             n.AuthenticationTicket.Identity.AuthenticationType,
                             "name", "role");
-                        ci.AddClaims(claimsToKeep);
+                        claimsIdentity.AddClaims(claimsToKeep);
 
                         n.AuthenticationTicket = new Microsoft.Owin.Security.AuthenticationTicket(
-                            ci, n.AuthenticationTicket.Properties
+                            claimsIdentity, n.AuthenticationTicket.Properties
                         );
                     },
                     RedirectToIdentityProvider = n =>

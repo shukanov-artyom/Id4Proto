@@ -9,8 +9,6 @@
 
 namespace WebApp
 {
-
-
     public partial class About
     {
     }

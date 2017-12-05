@@ -54,7 +54,7 @@ namespace IdentityServer4.Quickstart.UI
 
             if (result.HasValidationError)
             {
-                ModelState.AddModelError("", result.ValidationError);
+                ModelState.AddModelError(string.Empty, result.ValidationError);
             }
 
             if (result.ShowView)

@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.Security.Claims;
 using IdentityServer4;
 using IdentityServer4.Models;
-using IdentityServer4.Test;
 
 namespace QuickstartIdentityServer
 {
@@ -16,11 +14,7 @@ namespace QuickstartIdentityServer
                 new IdentityResources.OpenId(),
                 new IdentityResources.Profile(),
                 new IdentityResources.Email(),
-                new IdentityResources.Address(),
-                new IdentityResource(
-                    name: "profile.agent",
-                    displayName: "Agent profile",
-                    claimTypes: new[] { "agentinfo1", "agentinfo2" })
+                new IdentityResources.Address()
             };
         }
 
@@ -50,9 +44,7 @@ namespace QuickstartIdentityServer
                     {
                         IdentityServerConstants.StandardScopes.OpenId,
                         IdentityServerConstants.StandardScopes.Profile,
-                        IdentityServerConstants.StandardScopes.Email,
-                        "profile.agent"
-                        //IdentityServerConstants.StandardScopes.Address
+                        IdentityServerConstants.StandardScopes.Email
                     },
 
                     ClientUri = "https://medbullets.io",
@@ -97,43 +89,34 @@ namespace QuickstartIdentityServer
                     {
                         "http://localhost:5970/"
                     }
-                }
-            };
-        }
-
-        public static List<TestUser> GetUsers()
-        {
-            return new List<TestUser>
-            {
-                new TestUser
-                {
-                    SubjectId = "1",
-                    Username = "alice",
-                    Password = "alice",
-                    Claims = new List<Claim>
-                    {
-                        new Claim("name", "Alice"),
-                        new Claim("email", "alice@gmail.com"),
-                        new Claim("address", "Minsk"),
-                        new Claim("website", "https://alice.com"),
-                        new Claim("agentinfo1", "I'm Alice One!"),
-                        new Claim("agentinfo2", "I'm Alice Two!")
-                    }
                 },
-                new TestUser
+                new Client
                 {
-                    SubjectId = "2",
-                    Username = "bob",
-                    Password = "bob",
-
-                    Claims = new List<Claim>
+                    ClientName = "Consolidated Platform",
+                    ClientId = "implicit.cp",
+                    AllowedGrantTypes = GrantTypes.Implicit,
+                    // TODO : investigate and get rid of passing access tokens to front channel
+                    AllowAccessTokensViaBrowser = true,
+                    AllowedScopes = new List<string>()
                     {
-                        new Claim("name", "Bob"),
-                        new Claim("email", "bob@gmail.com"),
-                        new Claim("address", "Mazyr"),
-                        new Claim("website", "https://bob.com"),
-                        new Claim("agentinfo1", "I'm Bob One!"),
-                        new Claim("agentinfo2", "I'm Bob Two!"),
+                        IdentityServerConstants.StandardScopes.OpenId,
+                        IdentityServerConstants.StandardScopes.Profile,
+                        IdentityServerConstants.StandardScopes.Email,
+                        IdentityServerConstants.StandardScopes.Address
+                    },
+
+                    ClientUri = "https://cp.io",
+
+                    RequireConsent = false,
+                    AllowRememberConsent = true,
+                    FrontChannelLogoutUri = "http://local.orthobullets.com/logout.aspx",
+                    RedirectUris = new List<string>
+                    {
+                        "http://local.orthobullets.com/signin-oidc"
+                    },
+                    PostLogoutRedirectUris = new List<string>
+                    {
+                        "http://local.orthobullets.com/"
                     }
                 }
             };

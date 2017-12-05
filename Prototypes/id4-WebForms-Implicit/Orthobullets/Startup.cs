@@ -57,6 +57,7 @@ namespace WebApp
                         {
                             claimsToKeep.Add(new Claim("access_token", n.ProtocolMessage.AccessToken));
 
+                            // Here we (having ans access token) call UserInfo Endpoint to get claims 
                             var userInfoClient = new UserInfoClient(
                                 new Uri("https://localhost:44336/connect/userinfo"),
                                 n.ProtocolMessage.AccessToken);
